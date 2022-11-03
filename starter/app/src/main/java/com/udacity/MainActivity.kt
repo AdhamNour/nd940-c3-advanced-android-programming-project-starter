@@ -4,14 +4,17 @@ import android.app.DownloadManager
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.BroadcastReceiver
+import android.content.ContentValues.TAG
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.NotificationCompat
+import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.content_main.*
 
@@ -52,6 +55,7 @@ class MainActivity : AppCompatActivity() {
             if (radioGroup.checkedRadioButtonId != -1) {
                 download()
                 Toast.makeText(this, URL, Toast.LENGTH_SHORT).show()
+                custom_button.buttonState = ButtonState.Loading
                 radioGroup.clearCheck()
             } else {
                 Toast.makeText(this, "Please Check a library to download", Toast.LENGTH_SHORT)
@@ -63,6 +67,10 @@ class MainActivity : AppCompatActivity() {
     private val receiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             val id = intent?.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1)
+            if(id ==downloadID){
+                custom_button.buttonState=ButtonState.Completed
+                Log.d("Adham", "Download finished")
+            }
         }
     }
 

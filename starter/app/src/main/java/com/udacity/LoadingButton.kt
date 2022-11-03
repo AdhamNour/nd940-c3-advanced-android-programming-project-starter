@@ -31,7 +31,12 @@ class LoadingButton @JvmOverloads constructor(
     private var valueAnimator = ValueAnimator()
     private var title = "Download"
 
-    private var buttonState: ButtonState by Delegates.observable<ButtonState>(ButtonState.Completed) { p, old, new ->
+    var buttonState: ButtonState by Delegates.observable<ButtonState>(ButtonState.Completed) { p, old, new ->
+        when (new) {
+            ButtonState.Loading -> startAnimation()
+            ButtonState.Completed -> stopAnimation()
+        }
+
 
     }
     private val paint = Paint().apply {
@@ -42,6 +47,7 @@ class LoadingButton @JvmOverloads constructor(
     init {
         valueAnimator = ValueAnimator.ofFloat(0f, 1f);
         valueAnimator.setDuration(5500)
+        valueAnimator.repeatCount=ValueAnimator.INFINITE
         valueAnimator.addUpdateListener {
             progress = it.animatedValue as Float
             invalidate()
@@ -50,7 +56,6 @@ class LoadingButton @JvmOverloads constructor(
         valueAnimator.addListener(object : AnimatorListenerAdapter() {
             override fun onAnimationEnd(animation: Animator?) {
                 progress = 0f
-                startAnimation()
             }
         })
     }
@@ -73,7 +78,7 @@ class LoadingButton @JvmOverloads constructor(
         paint.color = Color.WHITE
         textWidth = paint.measureText(title)
         canvas.drawText(
-            "title",
+            title,
             widthSize / 2 - textWidth / 2,
             heightSize / 2 - (paint.descent() + paint.ascent()) / 2,
             paint
@@ -123,8 +128,11 @@ class LoadingButton @JvmOverloads constructor(
     }
 
     private fun stopAnimation() {
-        title="Download..."
+        title="Download"
+        progress=0f
+        Log.d("Adham", "stopAnimation")
         valueAnimator.cancel()
+        invalidate()
     }
 }
 
