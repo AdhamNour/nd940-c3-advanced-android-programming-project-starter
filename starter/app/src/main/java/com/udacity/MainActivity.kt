@@ -9,6 +9,7 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.net.Uri
 import android.os.Bundle
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.NotificationCompat
 import kotlinx.android.synthetic.main.activity_main.*
@@ -30,8 +31,32 @@ class MainActivity : AppCompatActivity() {
 
         registerReceiver(receiver, IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE))
 
+
+        radioGroup.setOnCheckedChangeListener { _, i ->
+            if (i == R.id.radio_load_app) {
+                URL = UDACITY_URI
+            }
+            if (i == R.id.radio_glide) {
+                URL = GLIDE_URI
+            }
+
+
+            if (i == R.id.radio_retro) {
+                URL = RETROFIT_URI
+            }
+
+
+        }
+
         custom_button.setOnClickListener {
-            download()
+            if (radioGroup.checkedRadioButtonId != -1) {
+                download()
+                Toast.makeText(this, URL, Toast.LENGTH_SHORT).show()
+                radioGroup.clearCheck()
+            } else {
+                Toast.makeText(this, "Please Check a library to download", Toast.LENGTH_SHORT)
+                    .show()
+            }
         }
     }
 
@@ -56,8 +81,14 @@ class MainActivity : AppCompatActivity() {
     }
 
     companion object {
-        private const val URL =
+
+        private const val GLIDE_URI = "https://github.com/bumptech/glide/archive/master.zip"
+        private const val UDACITY_URI =
             "https://github.com/udacity/nd940-c3-advanced-android-programming-project-starter/archive/master.zip"
+        private const val RETROFIT_URI = "https://github.com/square/retrofit/archive/master.zip"
+
+        private var URL = UDACITY_URI
+
         private const val CHANNEL_ID = "channelId"
     }
 

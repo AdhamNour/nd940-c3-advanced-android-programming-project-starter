@@ -61,7 +61,7 @@ class LoadingButton @JvmOverloads constructor(
         canvas.save()
         canvas.translate(widthSize / 2 + textWidth / 2 + circleHorizontalOffset, heightSize / 2 - textSizing / 2)
         paint.color=ContextCompat.getColor(context, R.color.colorAccent)
-        canvas.drawArc(RectF(0f, 0f, textSizing, textSizing), 0F, 180f, true,  paint)
+        canvas.drawArc(RectF(0f, 0f, textSizing, textSizing), 0F, progress*180f, true,  paint)
         canvas.restore()
     }
 
@@ -73,7 +73,7 @@ class LoadingButton @JvmOverloads constructor(
 
     private fun drawProgressBackground(canvas: Canvas?) {
         paint.color = ContextCompat.getColor(context, R.color.colorPrimaryDark)
-        canvas?.drawRect(0f, 0f, widthSize.toFloat()/2, heightSize.toFloat(), paint)
+        canvas?.drawRect(0f, 0f, progress*widthSize.toFloat(), heightSize.toFloat(), paint)
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
