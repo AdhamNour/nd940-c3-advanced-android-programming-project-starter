@@ -29,6 +29,7 @@ class LoadingButton @JvmOverloads constructor(
     private var progress = 0f;
 
     private var valueAnimator = ValueAnimator()
+    private var title = "Download"
 
     private var buttonState: ButtonState by Delegates.observable<ButtonState>(ButtonState.Completed) { p, old, new ->
 
@@ -70,9 +71,9 @@ class LoadingButton @JvmOverloads constructor(
 
     private fun drawTitle(canvas: Canvas) {
         paint.color = Color.WHITE
-        textWidth = paint.measureText("Download")
+        textWidth = paint.measureText(title)
         canvas.drawText(
-            "Download",
+            "title",
             widthSize / 2 - textWidth / 2,
             heightSize / 2 - (paint.descent() + paint.ascent()) / 2,
             paint
@@ -116,11 +117,13 @@ class LoadingButton @JvmOverloads constructor(
     }
 
     private fun startAnimation() {
+        title="we are loading ..."
         valueAnimator.start()
 
     }
 
     private fun stopAnimation() {
+        title="Download..."
         valueAnimator.cancel()
     }
 }
