@@ -1,5 +1,7 @@
 package com.udacity
 
+import android.animation.Animator
+import android.animation.AnimatorListenerAdapter
 import android.animation.ValueAnimator
 import android.annotation.SuppressLint
 import android.content.Context
@@ -9,7 +11,9 @@ import android.graphics.Paint
 import android.graphics.RectF
 import android.graphics.Typeface
 import android.util.AttributeSet
+import android.util.Log
 import android.view.View
+import androidx.core.animation.addListener
 import androidx.core.content.ContextCompat
 import kotlin.properties.Delegates
 
@@ -20,22 +24,34 @@ class LoadingButton @JvmOverloads constructor(
     private var heightSize = 0
     private var textWidth = 0f
     private var textSizing = resources.getDimension(R.dimen.default_text_size)
-    private var circleHorizontalOffset = textSizing/2
+    private var circleHorizontalOffset = textSizing / 2
 
-    private val progress = 0f;
+    private var progress = 0f;
 
-    private val valueAnimator = ValueAnimator()
+    private var valueAnimator = ValueAnimator()
 
     private var buttonState: ButtonState by Delegates.observable<ButtonState>(ButtonState.Completed) { p, old, new ->
 
     }
     private val paint = Paint().apply {
         isAntiAlias = true;
-        textSize=textSizing
+        textSize = textSizing
     }
 
     init {
-
+        valueAnimator = ValueAnimator.ofFloat(0f, 1f);
+        valueAnimator.setDuration(5500)
+        valueAnimator.addUpdateListener {
+            progress = it.animatedValue as Float
+            invalidate()
+            Log.d("Animations", progress.toString())
+        }
+        valueAnimator.addListener(object : AnimatorListenerAdapter() {
+            override fun onAnimationEnd(animation: Animator?) {
+                progress = 0f
+                startAnimation()
+            }
+        })
     }
 
 
@@ -48,20 +64,30 @@ class LoadingButton @JvmOverloads constructor(
             drawCirclarProgress(canvas)
 
         }
+        Log.d("Animations", progress.toString())
+
     }
 
     private fun drawTitle(canvas: Canvas) {
         paint.color = Color.WHITE
         textWidth = paint.measureText("Download")
-        canvas.drawText("Download", widthSize / 2 - textWidth / 2, heightSize / 2 - (paint.descent() + paint.ascent()) / 2, paint)
+        canvas.drawText(
+            "Download",
+            widthSize / 2 - textWidth / 2,
+            heightSize / 2 - (paint.descent() + paint.ascent()) / 2,
+            paint
+        )
 
     }
 
     private fun drawCirclarProgress(canvas: Canvas) {
         canvas.save()
-        canvas.translate(widthSize / 2 + textWidth / 2 + circleHorizontalOffset, heightSize / 2 - textSizing / 2)
-        paint.color=ContextCompat.getColor(context, R.color.colorAccent)
-        canvas.drawArc(RectF(0f, 0f, textSizing, textSizing), 0F, progress*180f, true,  paint)
+        canvas.translate(
+            widthSize / 2 + textWidth / 2 + circleHorizontalOffset,
+            heightSize / 2 - textSizing / 2
+        )
+        paint.color = ContextCompat.getColor(context, R.color.colorAccent)
+        canvas.drawArc(RectF(0f, 0f, textSizing, textSizing), 0F, progress * 360f, true, paint)
         canvas.restore()
     }
 
@@ -73,7 +99,7 @@ class LoadingButton @JvmOverloads constructor(
 
     private fun drawProgressBackground(canvas: Canvas?) {
         paint.color = ContextCompat.getColor(context, R.color.colorPrimaryDark)
-        canvas?.drawRect(0f, 0f, progress*widthSize.toFloat(), heightSize.toFloat(), paint)
+        canvas?.drawRect(0f, 0f, progress * widthSize.toFloat(), heightSize.toFloat(), paint)
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
@@ -89,6 +115,14 @@ class LoadingButton @JvmOverloads constructor(
         setMeasuredDimension(w, h)
     }
 
+    private fun startAnimation() {
+        valueAnimator.start()
+
+    }
+
+    private fun stopAnimation() {
+        valueAnimator.cancel()
+    }
 }
 
 
