@@ -1,5 +1,6 @@
 package com.udacity
 
+import android.Manifest
 import android.app.DownloadManager
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -8,6 +9,8 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.content.pm.PackageManager
+import android.content.pm.PermissionInfo
 import android.graphics.Color
 import android.net.Uri
 import android.os.Build
@@ -57,10 +60,17 @@ class MainActivity : AppCompatActivity() {
 
         custom_button.setOnClickListener {
             if (radioGroup.checkedRadioButtonId != -1) {
-                download()
-                Toast.makeText(this, URL, Toast.LENGTH_SHORT).show()
-                custom_button.buttonState = ButtonState.Loading
-                radioGroup.clearCheck()
+                if(ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
+                    Log.d("Adham", "Going to download")
+                    custom_button.buttonState = ButtonState.Loading
+                    download()
+                } else {
+                    Log.d("Adham", "Requesting")
+
+                    requestPermissions(arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE),
+                        PermissionInfo.PROTECTION_DANGEROUS);
+                }
+
             } else {
                 Toast.makeText(this, "Please Check a library to download", Toast.LENGTH_SHORT)
                     .show()
