@@ -1,26 +1,30 @@
 package com.udacity
 
 import android.app.DownloadManager
+import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.BroadcastReceiver
-import android.content.ContentValues.TAG
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.graphics.Color
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.NotificationCompat
-import com.google.android.material.snackbar.Snackbar
+import androidx.core.app.TaskStackBuilder
+import androidx.core.content.ContextCompat
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.content_main.*
 
 
 class MainActivity : AppCompatActivity() {
 
+    private val DOWNLOAD_COMPLETE_NOTIFICATION_ID: Int =0
     private var downloadID: Long = 0
 
     private lateinit var notificationManager: NotificationManager
@@ -33,7 +37,7 @@ class MainActivity : AppCompatActivity() {
         setSupportActionBar(toolbar)
 
         registerReceiver(receiver, IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE))
-
+        createNotificationChannel()
 
         radioGroup.setOnCheckedChangeListener { _, i ->
             if (i == R.id.radio_load_app) {
@@ -69,7 +73,7 @@ class MainActivity : AppCompatActivity() {
             val id = intent?.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1)
             if(id ==downloadID){
                 custom_button.buttonState=ButtonState.Completed
-                Log.d("Adham", "Download finished")
+                notifyDownloadComplete()
             }
         }
     }
@@ -86,6 +90,53 @@ class MainActivity : AppCompatActivity() {
         val downloadManager = getSystemService(DOWNLOAD_SERVICE) as DownloadManager
         downloadID =
             downloadManager.enqueue(request)// enqueue puts the download request in the queue.
+    }
+
+    private fun createNotificationChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
+            val notificationChannel = NotificationChannel(
+                CHANNEL_ID,
+                "AN Downloader",
+                NotificationManager.IMPORTANCE_HIGH).apply {
+                setShowBadge(false) }
+            notificationChannel.enableLights(true)
+            notificationChannel.lightColor = Color.BLUE
+            notificationChannel.enableVibration(true)
+            notificationChannel.description = "Download complete!"
+
+            val notificationManager = getSystemService(NotificationManager::class.java)
+            notificationManager.createNotificationChannel(notificationChannel)
+
+        }
+    }
+
+    private fun notifyDownloadComplete(){
+        notificationManager = ContextCompat.getSystemService(this,NotificationManager::class.java) as NotificationManager
+
+        val intent = Intent(this,DetailActivity::class.java)
+        intent.putExtra("downloadID",downloadID)
+        pendingIntent = TaskStackBuilder.create(this).run {
+            addNextIntentWithParentStack(intent)
+            getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT)
+        } as PendingIntent
+        action = NotificationCompat.Action(R.drawable.ic_baseline_cloud_download_24, getString(R.string.notification_button), pendingIntent)
+        val contentIntent = Intent(DownloadManager.ACTION_VIEW_DOWNLOADS).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK }
+        val contentPendingIntent = PendingIntent.getActivity(
+            applicationContext,
+            DOWNLOAD_COMPLETE_NOTIFICATION_ID,
+            contentIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT)
+        val notification = NotificationCompat.Builder(applicationContext, CHANNEL_ID)
+            .setSmallIcon(R.drawable.ic_baseline_cloud_download_24)
+            .setContentTitle("Your Download is Completed")
+            .setContentText("Your Download from ${URL} is completed successfully.")
+            .setContentIntent(contentPendingIntent)
+            .addAction(action)
+            .setPriority(NotificationCompat.PRIORITY_HIGH).build()
+        notificationManager.notify(DOWNLOAD_COMPLETE_NOTIFICATION_ID, notification)
+
+
     }
 
     companion object {
