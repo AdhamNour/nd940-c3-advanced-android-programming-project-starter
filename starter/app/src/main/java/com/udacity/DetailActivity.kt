@@ -20,16 +20,17 @@ class DetailActivity : AppCompatActivity() {
             val downloadManager = getSystemService(DOWNLOAD_SERVICE) as DownloadManager
             val cursor = downloadManager.query(DownloadManager.Query().setFilterById(downloadId))
             if (cursor.moveToFirst()) {
-                Log.d("Adham",cursor.getColumnIndex(DownloadManager.COLUMN_STATUS).toString())
-                file_name.text = when (cursor.getColumnIndex(DownloadManager.COLUMN_STATUS)) {
-                    DownloadManager.STATUS_SUCCESSFUL -> "Download Finished Successfully"
-                    DownloadManager.STATUS_FAILED -> "Download failed Successfully"
-                    DownloadManager.STATUS_PAUSED -> "Download paused Successfully"
-                    DownloadManager.STATUS_RUNNING -> "Download running Successfully"
-                    DownloadManager.STATUS_PENDING -> "Download pending Successfully"
+                Log.d("Adham", cursor.getColumnIndex(DownloadManager.COLUMN_STATUS).toString())
+                file_name.text =
+                    when (cursor.getInt(cursor.getColumnIndex(DownloadManager.COLUMN_STATUS))) {
+                        DownloadManager.STATUS_SUCCESSFUL -> "Download Finished Successfully"
+                        DownloadManager.STATUS_FAILED -> "Download failed Successfully"
+                        DownloadManager.STATUS_PAUSED -> "Download paused Successfully"
+                        DownloadManager.STATUS_RUNNING -> "Download running Successfully"
+                        DownloadManager.STATUS_PENDING -> "Download pending Successfully"
 
-                    else -> "There is some technical issues"
-                }
+                        else -> "There is some technical issues"
+                    }
 
             }
 
